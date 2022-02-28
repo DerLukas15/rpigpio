@@ -3,6 +3,7 @@
 package rpigpio
 
 import (
+	"fmt"
 	"os"
 
 	"github.com/DerLukas15/rpihardware"
@@ -55,6 +56,9 @@ const (
 	PullUp   PullMode = 0b10
 )
 
+//Enable Debug output
+var Debug bool
+
 // Errors
 var (
 	ErrNotInitialized = errors.New("Package not initialized or unsupported hardware. Check error during initialize.")
@@ -65,6 +69,7 @@ var NoEventClearing bool
 var curHardware *rpihardware.Hardware
 var gpioRegisterMem rpimemmap.MemMap
 
+//Initialize checks the hardware and opens the GPIO device for usage.
 func Initialize() error {
 	if gpioRegisterMem != nil {
 		//Already initialized
@@ -81,5 +86,12 @@ func Initialize() error {
 	if err != nil {
 		return err
 	}
+	logOutput("GPIO: " + gpioRegisterMem.String())
 	return nil
+}
+
+func logOutput(msg string) {
+	if Debug {
+		fmt.Println(msg)
+	}
 }
