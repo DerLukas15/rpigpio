@@ -47,7 +47,7 @@ func (p *Pin) Set(targetValue int) error {
 	if targetValue != 0 {
 		memoryOffset = registerOffsetSet + uint32(p.pinNum/32)*4 // 32 GPIOs per Register, 4 bytes per Register
 	}
-	*(rpimemmap.Reg32(gpioRegisterMem, memoryOffset)) |= 1 << (p.pinNum % 32)
+	*(rpimemmap.Reg32(gpioRegisterMem, memoryOffset)) = (1 << (p.pinNum % 32))
 	return nil
 }
 
@@ -71,7 +71,7 @@ func (p *Pin) Pull(targetMode PullMode) error {
 	memoryOffsetGppudClk := registerOffsetGppudClk + p.pinNum/32*4                // 32 GPIOs per Register, 4 bytes per Register
 	*(rpimemmap.Reg32(gpioRegisterMem, registerOffsetGppud)) = uint32(targetMode) // Set type of pull mode
 	time.Sleep(2 * time.Microsecond)
-	*(rpimemmap.Reg32(gpioRegisterMem, memoryOffsetGppudClk)) = 1 << (p.pinNum % 32) // Set which pin should use the defined pull mode
+	*(rpimemmap.Reg32(gpioRegisterMem, memoryOffsetGppudClk)) = (1 << (p.pinNum % 32)) // Set which pin should use the defined pull mode
 	time.Sleep(2 * time.Microsecond)
 	*(rpimemmap.Reg32(gpioRegisterMem, registerOffsetGppud)) = 0 // Set type of pull mode to 0
 	return nil
@@ -86,7 +86,7 @@ func (p *Pin) Event() (bool, error) {
 	memoryOffset := registerOffsetEventDetect + p.pinNum/32*4 // 32 GPIOs per Register, 4 bytes per Register
 	res := *(rpimemmap.Reg32(gpioRegisterMem, memoryOffset)) >> (p.pinNum % 32)
 	if !NoEventClearing {
-		*(rpimemmap.Reg32(gpioRegisterMem, memoryOffset)) = 1 << (p.pinNum % 32)
+		*(rpimemmap.Reg32(gpioRegisterMem, memoryOffset)) = (1 << (p.pinNum % 32))
 	}
 	return (res & 1) != 0, nil
 }
@@ -98,7 +98,7 @@ func (p *Pin) ClearEvent() error {
 	}
 	logOutput(fmt.Sprintf("Pin %d clear event", p.pinNum))
 	memoryOffset := registerOffsetEventDetect + p.pinNum/32*4 // 32 GPIOs per Register, 4 bytes per Register
-	*(rpimemmap.Reg32(gpioRegisterMem, memoryOffset)) = 1 << (p.pinNum % 32)
+	*(rpimemmap.Reg32(gpioRegisterMem, memoryOffset)) = (1 << (p.pinNum % 32))
 	return nil
 }
 
