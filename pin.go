@@ -68,7 +68,7 @@ func (p *Pin) Pull(targetMode PullMode) error {
 		return errors.Wrap(ErrNotInitialized, "pin pull")
 	}
 	logOutput(fmt.Sprintf("Pin %d pull %d", p.pinNum, targetMode))
-	memoryOffsetGppudClk := registerOffsetGppudClk + p.pinNum/32*4                // 32 GPIOs per Register, 4 bytes per Register
+	memoryOffsetGppudClk := registerOffsetGppudClk + uint32(p.pinNum/32)*4        // 32 GPIOs per Register, 4 bytes per Register
 	*(rpimemmap.Reg32(gpioRegisterMem, registerOffsetGppud)) = uint32(targetMode) // Set type of pull mode
 	time.Sleep(2 * time.Microsecond)
 	*(rpimemmap.Reg32(gpioRegisterMem, memoryOffsetGppudClk)) = (1 << (p.pinNum % 32)) // Set which pin should use the defined pull mode
@@ -83,11 +83,12 @@ func (p *Pin) Event() (bool, error) {
 		return false, errors.Wrap(ErrNotInitialized, "pin event")
 	}
 	logOutput(fmt.Sprintf("Pin %d event", p.pinNum))
-	memoryOffset := registerOffsetEventDetect + p.pinNum/32*4 // 32 GPIOs per Register, 4 bytes per Register
+	memoryOffset := registerOffsetEventDetect + uint32(p.pinNum/32)*4 // 32 GPIOs per Register, 4 bytes per Register
 	res := *(rpimemmap.Reg32(gpioRegisterMem, memoryOffset)) >> (p.pinNum % 32)
 	if !NoEventClearing {
 		*(rpimemmap.Reg32(gpioRegisterMem, memoryOffset)) = (1 << (p.pinNum % 32))
 	}
+	time.Sleep(10 * time.Microsecond)
 	return (res & 1) != 0, nil
 }
 
@@ -97,7 +98,7 @@ func (p *Pin) ClearEvent() error {
 		return errors.Wrap(ErrNotInitialized, "pin clear event")
 	}
 	logOutput(fmt.Sprintf("Pin %d clear event", p.pinNum))
-	memoryOffset := registerOffsetEventDetect + p.pinNum/32*4 // 32 GPIOs per Register, 4 bytes per Register
+	memoryOffset := registerOffsetEventDetect + uint32(p.pinNum/32)*4 // 32 GPIOs per Register, 4 bytes per Register
 	*(rpimemmap.Reg32(gpioRegisterMem, memoryOffset)) = (1 << (p.pinNum % 32))
 	return nil
 }
@@ -108,7 +109,7 @@ func (p *Pin) RisingEdgeDetect(targetStatus bool) error {
 		return errors.Wrap(ErrNotInitialized, "pin rising detect")
 	}
 	logOutput(fmt.Sprintf("Pin %d rising edge detect %t", p.pinNum, targetStatus))
-	memoryOffset := registerOffsetRisingEdge + p.pinNum/32*4 // 32 GPIOs per Register, 4 bytes per Register
+	memoryOffset := registerOffsetRisingEdge + uint32(p.pinNum/32)*4 // 32 GPIOs per Register, 4 bytes per Register
 	if targetStatus {
 		*(rpimemmap.Reg32(gpioRegisterMem, memoryOffset)) |= (1 << (p.pinNum % 32))
 	} else {
@@ -123,7 +124,7 @@ func (p *Pin) FallingEdgeDetect(targetStatus bool) error {
 		return errors.Wrap(ErrNotInitialized, "pin falling detect")
 	}
 	logOutput(fmt.Sprintf("Pin %d falling edge detect %t", p.pinNum, targetStatus))
-	memoryOffset := registerOffsetFallingEdge + p.pinNum/32*4 // 32 GPIOs per Register, 4 bytes per Register
+	memoryOffset := registerOffsetFallingEdge + uint32(p.pinNum/32)*4 // 32 GPIOs per Register, 4 bytes per Register
 	if targetStatus {
 		*(rpimemmap.Reg32(gpioRegisterMem, memoryOffset)) |= (1 << (p.pinNum % 32))
 	} else {
@@ -138,7 +139,7 @@ func (p *Pin) ARisingEdgeDetect(targetStatus bool) error {
 		return errors.Wrap(ErrNotInitialized, "pin async rising detect")
 	}
 	logOutput(fmt.Sprintf("Pin %d async rising edge detect %t", p.pinNum, targetStatus))
-	memoryOffset := registerOffsetARisingEdge + p.pinNum/32*4 // 32 GPIOs per Register, 4 bytes per Register
+	memoryOffset := registerOffsetARisingEdge + uint32(p.pinNum/32)*4 // 32 GPIOs per Register, 4 bytes per Register
 	if targetStatus {
 		*(rpimemmap.Reg32(gpioRegisterMem, memoryOffset)) |= (1 << (p.pinNum % 32))
 	} else {
@@ -153,7 +154,7 @@ func (p *Pin) AFallingEdgeDetect(targetStatus bool) error {
 		return errors.Wrap(ErrNotInitialized, "pin async falling detect")
 	}
 	logOutput(fmt.Sprintf("Pin %d async falling edge detect %t", p.pinNum, targetStatus))
-	memoryOffset := registerOffsetAFallingEdge + p.pinNum/32*4 // 32 GPIOs per Register, 4 bytes per Register
+	memoryOffset := registerOffsetAFallingEdge + uint32(p.pinNum/32)*4 // 32 GPIOs per Register, 4 bytes per Register
 	if targetStatus {
 		*(rpimemmap.Reg32(gpioRegisterMem, memoryOffset)) |= (1 << (p.pinNum % 32))
 	} else {
@@ -168,7 +169,7 @@ func (p *Pin) HighDetect(targetStatus bool) error {
 		return errors.Wrap(ErrNotInitialized, "pin high detect")
 	}
 	logOutput(fmt.Sprintf("Pin %d high detect %t", p.pinNum, targetStatus))
-	memoryOffset := registerOffsetHighDetect + p.pinNum/32*4 // 32 GPIOs per Register, 4 bytes per Register
+	memoryOffset := registerOffsetHighDetect + uint32(p.pinNum/32)*4 // 32 GPIOs per Register, 4 bytes per Register
 	if targetStatus {
 		*(rpimemmap.Reg32(gpioRegisterMem, memoryOffset)) |= (1 << (p.pinNum % 32))
 	} else {
@@ -183,7 +184,7 @@ func (p *Pin) LowDetect(targetStatus bool) error {
 		return errors.Wrap(ErrNotInitialized, "pin low detect")
 	}
 	logOutput(fmt.Sprintf("Pin %d low detect %t", p.pinNum, targetStatus))
-	memoryOffset := registerOffsetLowDetect + p.pinNum/32*4 // 32 GPIOs per Register, 4 bytes per Register
+	memoryOffset := registerOffsetLowDetect + uint32(p.pinNum/32)*4 // 32 GPIOs per Register, 4 bytes per Register
 	if targetStatus {
 		*(rpimemmap.Reg32(gpioRegisterMem, memoryOffset)) |= (1 << (p.pinNum % 32))
 	} else {
